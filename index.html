@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayer Times</title>
+    <style>
+        body {
+            background-image: url(images/islamic-prayer-temple-with-islamic-prayer-background-with-sunlight-it_921860-6225.avif);
+        }
+        #header {
+            border: 2px solid black;
+            width: 60%;
+            color: orangered;
+            height: 10vh;
+            background-color: black;
+            padding-left: 40%;
+            font-size: 50px;
+        }
+        input {
+            margin-left: 520px;
+        }
+        input:focus {
+            background-color: blue;
+        }
+        button {
+            background-color: gray;
+            width: 80px;
+        }
+        h1 {
+            font-size: 50px;
+            margin-left: 10px;
+            color: orange;
+            border: 2px solid black;
+            background-color: black;
+            width: 25%;
+            height: 15vh;
+        }
+        #result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #prayers {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .prayer-box {
+            border: 2px solid black;
+            padding: 20px;
+            background-color: red;
+            width: 120px;
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: #333;
+            border-radius: 8px;
+            height: 30vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">PRAYER APP</div>
+    <div id="layout">
+        <br>
+        <input type="text" id="cityName" placeholder="Please enter city name">
+        <input type="text" id="countryName" placeholder="Please enter country name">
+        <button onclick="getprayertime()">Submit</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function getprayertime() {
+            const city = document.querySelector("#cityName").value.trim();
+            const country = document.querySelector("#countryName").value.trim();
+            const resultDiv = document.querySelector("#result");
+
+            resultDiv.innerHTML = '';  
+
+            if (!city || !country) {
+                resultDiv.innerHTML = "Please enter both city and country names!";
+                return;
+            }
+
+            // Updated URL with proper parameters
+            const url = `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=2`;
+
+            axios.get(url)
+                .then(function(response) {
+                    const data = response.data;
+
+                    if (data && data.data && data.data.timings) {
+                        const prayerTimes = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+                        let prayerTimesHTML = "<h1>Prayer Times</h1>"; 
+                        prayerTimesHTML += "<div id='prayers'>";
+
+                        prayerTimes.forEach(prayer => {
+                            if (data.data.timings[prayer]) {
+                                prayerTimesHTML += ` 
+                                    <div class="prayer-box">
+                                        <p>${prayer}</p>
+                                        <p>${data.data.timings[prayer]}</p>
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        prayerTimesHTML += "</div>";
+                        resultDiv.innerHTML = prayerTimesHTML;
+                    } else {
+                        resultDiv.innerHTML = "Could not retrieve prayer times for this location.";
+                    }
+                })
+                .catch(function(error) {
+                    resultDiv.innerHTML = "There was an error fetching prayer times!";
+                    console.log(error.message);
+                });
+        }
+    </script>
+</body>
+</html>
